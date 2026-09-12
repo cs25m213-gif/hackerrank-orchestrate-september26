@@ -191,3 +191,12 @@ Before submitting, confirm:
 - Every `amount_safe_to_pay` satisfies `0 <= amount_safe_to_pay <= requested_amount`.
 - Every installment plan matches a supplied payment option, and every spending change targets a flexible recurring expense.
 - Your runnable code, setup instructions, and `evaluation/` folder are included in `code.zip`.
+
+## Implemented Python baseline
+
+Start with [the idea](IDEA.md) or open [the interactive explanation](idea.html).
+See [code/README.md](code/README.md) for dynamic API image extraction, caching,
+setup, safety tests, public-sample metrics and limitations. Set `OPENAI_API_KEY`
+in your environment, then run `python3 code/main.py` for a new dataset.
+For the supplied dataset without an API key, use
+`python3 code/main.py --vision offline --allow-legacy-cache`.

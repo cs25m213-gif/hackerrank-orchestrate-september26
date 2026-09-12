@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Buy or Wait? — Understand the idea</title>
+<style>
+body{font:16px/1.6 system-ui,sans-serif;background:#f5f7fb;color:#16243b;margin:0}main{max-width:1050px;margin:auto;padding:32px 20px}h1{font-size:42px;line-height:1.15;margin:8px 0 18px}h2{font-size:22px}small,.muted{color:#53627b}.layout{display:grid;grid-template-columns:300px 1fr;gap:24px}.card{background:white;border:1px solid #dce2ec;border-radius:16px;padding:24px;margin:20px 0}label{display:block;margin:14px 0 4px}input{font:inherit;width:100%;box-sizing:border-box;border:1px solid #aab5c6;border-radius:6px;padding:9px}#safe{font-size:36px;color:#116456;font-weight:750}#decision{font-size:20px;font-weight:650}svg{width:100%;height:auto}li{margin-bottom:8px}.pill{font-size:13px;text-transform:uppercase;letter-spacing:1px;color:#116456}table{width:100%;border-collapse:collapse;font-size:14px}th,td{padding:8px;border-bottom:1px solid #eee;text-align:left}.legend{display:flex;gap:20px;flex-wrap:wrap}.blue{color:#2458bc}.orange{color:#ac4e13}@media(max-width:750px){.layout{grid-template-columns:1fr}h1{font-size:32px}}
+</style>
+<main><div class="pill">Buy or Wait? · Interactive explanation</div><h1>Can I buy it and still pay my bills?</h1>
+<p>A bank balance is a snapshot. This agent checks what happens <strong>after the purchase</strong>, across the next 90 days.</p>
+<p class="muted">Fictional INR example for learning. This page is separate from the actual dataset predictions.</p>
+<div class="layout"><section class="card"><h2>Try your own example</h2>
+<label for="opening">Money available today (₹)</label><input id="opening" type="number" min="0" value="20000" step="500">
+<label for="reserve">Keep untouched (₹)</label><input id="reserve" type="number" min="0" value="5000" step="500">
+<label for="salary">Confirmed monthly salary (₹)</label><input id="salary" type="number" min="0" value="18000" step="500">
+<label for="bills">Monthly bills (₹)</label><input id="bills" type="number" min="0" value="12000" step="500">
+<label for="purchase">Purchase price (₹)</label><input id="purchase" type="number" min="0" value="8000" step="500">
+<p class="muted">Example timing: bills on days 5, 35, 65; salary on days 15, 45, 75. No other spending or income is assumed.</p></section>
+<section><div class="card" aria-live="polite"><div>Safe to pay today</div><div id="safe"></div><div id="decision"></div><p id="why"></p></div>
+<div class="card"><h2>What happens to the balance?</h2><div class="legend"><span class="blue">● Before purchase</span><span class="orange">● Pay full price today</span><span>--- Protected minimum</span></div>
+<svg id="chart" viewBox="0 0 640 260" role="img" aria-label="90-day forecast balance chart"></svg><small>Horizontal axis: days from today. Vertical axis: money available.</small>
+<table><thead><tr><th>When</th><th>Event</th><th>Balance if bought today</th></tr></thead><tbody id="events"></tbody></table></div></section></div>
+<section class="card"><h2>Where does AI help?</h2><ol><li><strong>Read evidence:</strong> the vision API reads bills and receipts into amount, currency and source text.</li><li><strong>Cache the facts:</strong> unchanged images and context do not need another API call.</li><li><strong>Calculate:</strong> Python forecasts expenses and tests payment options against the reserve and deadline.</li><li><strong>Explain:</strong> show the chosen schedule and the facts that support it.</li></ol><p>The real solution also handles pending debits, dated exchange rates, partial payments, offered installments and protected spending. An uncertain image is retried with a stronger model and flagged if it still cannot be read.</p></section>
+</main>
+<script>
+const ids=['opening','reserve','salary','bills','purchase'];
+const money=n=>'₹'+Math.round(n).toLocaleString('en-IN');
+function render(){
+const v=Object.fromEntries(ids.map(id=>[id,Math.max(0,Number(document.getElementById(id).value)||0)]));
+let bal=v.opening;const baseline=[],events=[];
+for(let d=0;d<=90;d++){let event='';if([5,35,65].includes(d)){bal-=v.bills;event='Bills paid'}if([15,45,75].includes(d)){bal+=v.salary;event='Salary settles'}baseline.push(bal);if(event)events.push([d,event,bal-v.purchase]);}
+const lowest=Math.min(...baseline),safe=Math.max(0,Math.min(v.purchase,lowest-v.reserve));
+const earliest=lowest<v.reserve?-1:baseline.findIndex((_,i)=>Math.min(...baseline.slice(i))-v.purchase>=v.reserve);
+document.getElementById('safe').textContent=money(safe);
+document.getElementById('decision').textContent=safe>=v.purchase?'Full payment fits the example forecast.':earliest>=0?'Wait until day '+earliest+' for full payment.':'Full payment does not fit this 90-day forecast.';
+document.getElementById('why').textContent='The lowest balance before the purchase is '+money(lowest)+'. Keep '+money(v.reserve)+' protected; the rest is available for the purchase, capped at its price.';
+const lower=Math.min(0,...baseline.map(b=>b-v.purchase)),upper=Math.max(v.reserve,...baseline,1),span=Math.max(upper-lower,1);
+const x=d=>52+d*6.1,y=n=>220-(n-lower)/span*185;
+const path=delta=>baseline.map((b,d)=>(d?'L':'M')+x(d)+','+y(b-delta)).join(' ');
+document.getElementById('chart').innerHTML='<line x1="52" x2="601" y1="'+y(v.reserve)+'" y2="'+y(v.reserve)+'" stroke="#53627b" stroke-dasharray="6 4"/><path d="'+path(0)+'" fill="none" stroke="#2458bc" stroke-width="3"/><path d="'+path(v.purchase)+'" fill="none" stroke="#ac4e13" stroke-width="3"/><text x="4" y="26" font-size="12">'+money(upper)+'</text><text x="4" y="235" font-size="12">'+money(lower)+'</text><text x="52" y="252" font-size="12">Today</text><text x="558" y="252" font-size="12">Day 90</text>';
+document.getElementById('events').innerHTML=events.map(([d,e,b])=>'<tr><td>Day '+d+'</td><td>'+e+'</td><td>'+money(b)+'</td></tr>').join('');
+}
+ids.forEach(id=>document.getElementById(id).addEventListener('input',render));render();
+</script></html>

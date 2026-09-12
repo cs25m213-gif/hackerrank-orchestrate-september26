@@ -1,0 +1,13 @@
+{
+  "sample_count": 25,
+  "exact_matches": {
+    "amount_safe_to_pay": 3,
+    "affordability_status": 20,
+    "recommended_payment_method": 21,
+    "payment_plan": 18,
+    "earliest_date_for_full_payment": 18,
+    "spending_changes_needed": 18
+  },
+  "mean_safe_amount_error_fraction_of_request": 0.045523362073231585,
+  "note": "Diagnostic only; sample outputs are never used to fit forecasts."
+}

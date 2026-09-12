@@ -1,8 +1,8 @@
 # Final run usage
 
 Status: completed.
-Requests: 250. Output SHA-256: `2531da79d563d75304f6c72373b27e89d9ee3d0b18e19c4e02660535c94bce73`.
-API cache hits: 0; legacy development-cache hits: 11.
+Requests: 25. Output SHA-256: `dfa4e80bea7a3592291dc67c53fa4cbde6513a307ceba4a09b48d2a926514a3c`.
+API cache hits: 0; legacy development-cache hits: 5.
 
 | Provider/model | Calls | Input tokens | Cached input | Output tokens | Total tokens | Tokens/request | Est. USD | USD/request |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|

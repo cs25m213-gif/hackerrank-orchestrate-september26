@@ -1,0 +1,10 @@
+log.txt
+.env
+.env.*
+__pycache__/
+*.pyc
+.venv/
+code/cache/ocr/
+code.zip
+code/cache/vision/
+chat_transcript.md
